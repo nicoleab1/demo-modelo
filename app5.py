@@ -159,4 +159,16 @@ def pantalla_actuaciones():
 
     if st.session_state.actuaciones:
         st.subheader("Actuaciones registradas")
-        st.write(pd.
+        st.write(pd.DataFrame(st.session_state.actuaciones))
+
+# ==========================
+# Render según paso
+# ==========================
+if st.session_state.step == 1:
+    pantalla_inicio()
+elif st.session_state.step == 2:
+    pantalla_entidad()
+elif st.session_state.step == 3:
+    pantalla_crear_plan()
+elif st.session_state.step == 4:
+    pantalla_actuaciones()
