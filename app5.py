@@ -1,77 +1,93 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
-# ==============================
-# Inicialización de estado
-# ==============================
+def pantalla_inicio():
+    """Pantalla de inicio: nombre de la organización y tipo de entidad"""
+    st.title("Bienvenido a la herramienta de planificación municipal")
+
+    # Nombre de la organización
+    st.session_state.org_name = st.text_input("Nombre de la organización/entidad:")
+
+    # Tipo de entidad
+    st.session_state.tipo_entidad = st.selectbox(
+        "Tipo de entidad:",
+        ["Local", "Autonómica", "Provincial o conjunto de municipios"]
+    )
+
+    # Prioridades
+    prioridades_posibles = [
+        "Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular",
+        "Gobernanza", "Modelo de ciudad", "Vivienda", "Movilidad sostenible",
+        "Biodiversidad", "Desigualdades", "Digitalización", "Datos"
+    ]
+    st.session_state.prioridades = st.multiselect(
+        "Selecciona las prioridades de la entidad:",
+        prioridades_posibles
+    )
+
+    # Botón continuar
+    if st.button("Continuar ➡️"):
+        st.session_state.step = 2
+
+def pantalla_prioridades_actuales():
+    """Pantalla 2: visualización de la situación actual de las prioridades"""
+    st.title(f"{st.session_state.org_name} - Situación actual")
+
+    st.subheader("Tipo de entidad: " + st.session_state.tipo_entidad)
+
+    st.markdown("---")
+    st.subheader("📊 Situación actual de las prioridades seleccionadas")
+
+    # Mockup: estado aleatorio de cada prioridad (más adelante usar datos reales)
+    estados_posibles = ["verde", "amarillo", "rojo"]
+    descripciones = {"verde": "Sobresaliente", "amarillo": "Satisfactorio", "rojo": "Necesita mejorar"}
+    colores = {"verde": "#4CAF50", "amarillo": "#FFC107", "rojo": "#F44336"}
+
+    # Columnas por fila
+    n_cols = 4
+    prioridades = st.session_state.prioridades
+    n_prioridades = len(prioridades)
+    
+    for i in range(0, n_prioridades, n_cols):
+        cols = st.columns(n_cols)
+        for j, prioridad in enumerate(prioridades[i:i+n_cols]):
+            estado = np.random.choice(estados_posibles)  # mockup, reemplazar con datos reales
+            with cols[j]:
+                st.markdown(
+                    f"""
+                    <div style="text-align:center; margin-bottom:10px;">
+                        <div style="width:70px; height:70px; border-radius:50%; background-color:{colores[estado]}; margin:auto;"></div>
+                        <p style="margin:5px 0 0 0; font-weight:bold;">{prioridad}</p>
+                        <p style="margin:0; font-size:0.9em;">{descripciones[estado]}</p>
+                    </div>
+                    """, unsafe_allow_html=True
+                )
+
+    st.markdown("---")
+    if st.button("Continuar ➡️"):
+        st.session_state.step = 3  # siguiente pantalla (por ejemplo, pantalla de actuaciones)
+
+# ------------------------
+# Inicialización de session_state
+# ------------------------
 if "step" not in st.session_state:
     st.session_state.step = 1
 if "org_name" not in st.session_state:
     st.session_state.org_name = ""
-if "entidad" not in st.session_state:
-    st.session_state.entidad = ""
+if "tipo_entidad" not in st.session_state:
+    st.session_state.tipo_entidad = ""
 if "prioridades" not in st.session_state:
     st.session_state.prioridades = []
-if "plan" not in st.session_state:
-    st.session_state.plan = {}
-if "actuaciones" not in st.session_state:
-    st.session_state.actuaciones = []
 
-# ==============================
-# Funciones para navegación
-# ==============================
-def next_step():
-    st.session_state.step += 1
+# ------------------------
+# Control de pantallas
+# ------------------------
+if st.session_state.step == 1:
+    pantalla_inicio()
+elif st.session_state.step == 2:
+    pantalla_prioridades_actuales()
 
-def prev_step():
-    st.session_state.step -= 1
-
-# ==============================
-# Pantalla 1 - Inicio
-# ==============================
-def pantalla_inicio():
-    st.title("Bienvenido al simulador de impacto")
-    st.write("Por favor, completa la información inicial:")
-
-    org_name = st.text_input("Nombre de la entidad:", st.session_state.org_name)
-    entidad = st.selectbox("Tipo de entidad:", ["Local", "Autonómica", "Provincial o conjunto de municipios"], index=0)
-    prioridades = st.multiselect(
-        "Selecciona las prioridades de la entidad:",
-        ["Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular", "Gobernanza", "Modelo de ciudad", "Vivienda", "Movilidad sostenible", "Biodiversidad", "Desigualdades", "Digitalización", "Datos"],
-        default=st.session_state.prioridades
-    )
-
-    if st.button("Continuar ➡️") and org_name and entidad:
-        st.session_state.org_name = org_name
-        st.session_state.entidad = entidad
-        st.session_state.prioridades = prioridades
-        next_step()
-
-# ==============================
-# Pantalla 2 - Datos de la entidad
-# ==============================
-def pantalla_entidad():
-    st.title(f"Entidad: {st.session_state.org_name}")
-    st.subheader("Datos del municipio")
-    st.write("📍 Ubicación: Comunidad de Madrid")
-    st.write("👥 Población: 118,000 habitantes (Alcobendas)")
-    st.write("🌍 Región: Zona Norte de Madrid")
-
-    st.subheader("Situación actual de prioridades")
-    # Colores de ejemplo
-    colores = {"Agua": "green", "Energía": "red", "Economía circular": "yellow",
-               "Movilidad sostenible": "green", "Biodiversidad": "red",
-               "Gobernanza de datos": "yellow", "Reducción de desigualdades": "green"}
-
-    for pr in st.session_state.prioridades:
-        color = colores.get(pr, "gray")
-        st.markdown(f"**{pr}**: <span style='color:{color}'>●</span>", unsafe_allow_html=True)
-
-    if st.button("Crea un plan para insertar actuaciones ➡️"):
-        next_step()
-
+    
 # ==============================
 # Pantalla 3 - Creación de plan
 # ==============================
