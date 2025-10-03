@@ -59,7 +59,6 @@ def pantalla_inicio():
 # ==========================
 def pantalla_prioridades_actuales():
     st.title(f"{st.session_state.org_name} - Situación actual")
-
     st.subheader("Tipo de entidad: " + st.session_state.tipo_entidad)
 
     st.markdown("---")
@@ -87,6 +86,7 @@ def pantalla_prioridades_actuales():
                     </div>
                     """, unsafe_allow_html=True
                 )
+
     st.markdown("---")
     if st.button("Continuar ➡️"):
         next_step()
@@ -109,7 +109,6 @@ def pantalla_crear_plan():
 def pantalla_actuaciones():
     st.title("Añadir actuación")
 
-    # Campos de actuación
     if "actuacion_tmp" not in st.session_state:
         st.session_state.actuacion_tmp = {
             "nombre": "",
@@ -123,11 +122,9 @@ def pantalla_actuaciones():
     tmp = st.session_state.actuacion_tmp
 
     tmp["nombre"] = st.text_input("Nombre de la actuación:", tmp["nombre"])
-
-    # Selección de áreas
     tmp["areas"] = st.multiselect("Áreas relacionadas:", st.session_state.prioridades, default=tmp["areas"])
 
-    # Tags por área
+    # Tags según área
     tags_por_area = {
         "Agua": ["Riego de zonas verdes", "Agua recuperada y regenerada", "Cantidad total de agua"],
         "Energía": ["Consumo final de combustibles", "Producción local EE.RR", "Consumo final de energía eléctrica", 
@@ -152,11 +149,9 @@ def pantalla_actuaciones():
         "Digitalización": ["Brecha digital", "Barreras a la accesibilidad universal"]
     }
 
-    # Construir lista de tags según áreas seleccionadas
     tags = []
     for area in tmp["areas"]:
         tags.extend(tags_por_area.get(area, []))
-
     tmp["tags"] = st.multiselect("Selecciona los tags activados:", tags, default=tmp["tags"])
 
     # Sliders
@@ -168,7 +163,6 @@ def pantalla_actuaciones():
     if st.button("💾 Guardar actuación"):
         st.session_state.actuaciones.append(tmp.copy())
         st.success(f"Actuación '{tmp['nombre']}' guardada.")
-        # limpiar tmp
         st.session_state.actuacion_tmp = {
             "nombre": "",
             "areas": [],
@@ -178,14 +172,14 @@ def pantalla_actuaciones():
             "escala": 50
         }
 
-    # Mostrar opciones adicionales si ya hay actuaciones guardadas
+    # Mostrar actuaciones guardadas
     if st.session_state.actuaciones:
         st.subheader("Actuaciones registradas")
         st.write(pd.DataFrame(st.session_state.actuaciones))
 
         col1, col2 = st.columns(2)
         if col1.button("➕ Añadir nueva actuación"):
-            # tmp ya fue limpiado al guardar, nada más se necesita
+            # tmp ya fue limpiado al guardar
             pass
         if col2.button("Simular impacto ➡️"):
             next_step()
