@@ -32,14 +32,14 @@ def prev_step():
 # Pantalla 1 - Inicio
 # ==============================
 def pantalla_inicio():
-    st.title("Bienvenido al simulador de impacto 🚀")
+    st.title("Bienvenido al simulador de impacto")
     st.write("Por favor, completa la información inicial:")
 
-    org_name = st.text_input("Nombre de la organización:", st.session_state.org_name)
-    entidad = st.selectbox("Tipo de entidad:", ["", "Local", "Autonómica", "Provincial o conjunto de municipios"], index=0)
+    org_name = st.text_input("Nombre de la entidad:", st.session_state.org_name)
+    entidad = st.selectbox("Tipo de entidad:", ["Local", "Autonómica", "Provincial o conjunto de municipios"], index=0)
     prioridades = st.multiselect(
         "Selecciona las prioridades de la entidad:",
-        ["Agua", "Energía", "Economía circular", "Movilidad sostenible", "Biodiversidad", "Gobernanza de datos", "Reducción de desigualdades"],
+        ["Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular", "Gobernanza de datos", "Modelo de ciudad", "Vivienda", "Movilidad sostenible", "Biodiversidad", "Reducción de desigualdades"],
         default=st.session_state.prioridades
     )
 
@@ -138,20 +138,24 @@ def pantalla_actuaciones():
 # Pantalla 5 - Dashboard resumen
 # ==============================
 def pantalla_dashboard():
-    st.title(f"Dashboard de {st.session_state.org_name}")
+    st.title(f"{st.session_state.org_name}")
 
-    st.subheader("🎯 Puntuación del plan (mockup)")
-    categorias = st.session_state.prioridades
-    valores = np.random.randint(50, 100, size=len(categorias))
-
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
-    angles = np.linspace(0, 2*np.pi, len(categorias), endpoint=False).tolist()
-    valores = np.concatenate((valores, [valores[0]]))
-    angles += angles[:1]
-    ax.plot(angles, valores, "o-", linewidth=2)
-    ax.fill(angles, valores, alpha=0.25)
-    ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(categorias)
+    st.subheader("🎯 Impacto del plan")
+    # Valor total de impacto del plan (mockup)
+    progreso = np.random.randint(50, 100)  # 0-100%
+    
+    # Gráfico de anillo
+    fig, ax = plt.subplots(figsize=(4, 4))
+    ax.pie(
+        [progreso, 100 - progreso],
+        colors=["#4CAF50", "#E0E0E0"],
+        startangle=90,
+        counterclock=False,
+        wedgeprops={"width":0.3, "edgecolor":"white"}
+    )
+    ax.text(0, 0, f"{progreso}%", ha="center", va="center", fontsize=24, fontweight="bold")
+    ax.set_aspect("equal")
+    
     st.pyplot(fig)
 
     st.subheader("📊 Prioridades: situación actual vs impacto esperado")
