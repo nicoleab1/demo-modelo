@@ -39,7 +39,7 @@ def pantalla_inicio():
     entidad = st.selectbox("Tipo de entidad:", ["Local", "Autonómica", "Provincial o conjunto de municipios"], index=0)
     prioridades = st.multiselect(
         "Selecciona las prioridades de la entidad:",
-        ["Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular", "Gobernanza de datos", "Modelo de ciudad", "Vivienda", "Movilidad sostenible", "Biodiversidad", "Reducción de desigualdades"],
+        ["Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular", "Gobernanza", "Modelo de ciudad", "Vivienda", "Movilidad sostenible", "Biodiversidad", "Desigualdades", "Digitalización", "Datos"],
         default=st.session_state.prioridades
     )
 
@@ -54,7 +54,7 @@ def pantalla_inicio():
 # ==============================
 def pantalla_entidad():
     st.title(f"Entidad: {st.session_state.org_name}")
-    st.subheader("Datos del municipio (mockup)")
+    st.subheader("Datos del municipio")
     st.write("📍 Ubicación: Comunidad de Madrid")
     st.write("👥 Población: 118,000 habitantes (Alcobendas)")
     st.write("🌍 Región: Zona Norte de Madrid")
@@ -98,20 +98,69 @@ def pantalla_plan():
 def pantalla_actuaciones():
     st.title("Añadir actuación")
 
+    # Nombre de la actuación
     nombre_act = st.text_input("Nombre de la actuación:")
-    areas = st.multiselect("Áreas relacionadas:", st.session_state.prioridades)
 
+    # Selección de áreas
+    areas = st.multiselect(
+        "Áreas relacionadas:", 
+        st.session_state.prioridades
+    )
+
+    # Diccionario que mapea prioridades a tags (capitalización normal)
+    tags_por_area = {
+        "Agua": ["Riego de zonas verdes", "Agua recuperada y regenerada", "Cantidad total de agua"],
+        "Energía": ["Consumo final de combustibles", "Producción local EE.RR", "Consumo final de energía eléctrica", 
+                    "Eficiencia energética de las viviendas", "Medidas de ahorro y eficiencia energética", "Alumbrado urbano"],
+        "Cambio climático": ["Inundaciones", "Seguridad"],
+        "Economía circular": ["Eficiencia de la estructura y logística de la recogida separativa de residuos",
+                              "IoT (smart cities)", "Control y vigilancia del tráfico", 
+                              "Infraestructura para el soporte de la electrificación de las flotas",
+                              "Movilidad compartida", "Economía colaborativa"],
+        "Economía": ["Actividad comercial, de ocio, hostelería y turismo (servicios)",
+                     "Adecuación del perfil de la población disponible a la demanda de empleo"],
+        "Gobernanza": ["Calidad de los planes y políticas", "Acceso a información", "Ineficiencias internas",
+                       "Capacitación y formación para el personal público", "Colaboración efectiva",
+                       "Participación efectiva"],
+        "Datos": ["Accesibilidad de la información pública", "Calidad de la información y datos puestos a disposición de la población",
+                  "Capacidad tecnológica y disponibilidad de medios de la entidad"],
+        "Modelo de ciudad": ["Regeneración y rehabilitación", "Calidad de las infraestructuras", "Calidad de la planificación urbana",
+                             "Patrimonio cultural", "Suelo destinado a usos comerciales", "Suelo destinado a usos residenciales",
+                             "Distribución equilibrada de los usos del suelo", "Selección de especies adaptadas a las condiciones climáticas",
+                             "Servicios socio-culturales", "Planificación para la biodiversidad urbana", "Uso servicios culturales",
+                             "Mantenimiento de los equipamientos e infraestructuras", "Estado del parque edificatorio público",
+                             "Especies autóctonas", "Cubiertas verdes y jardines verticales", "Huertos urbanos",
+                             "Zonas deportivas", "Espacios públicos de ocio", "Calidad del espacio público",
+                             "Suelo destinado a zonas verdes y espacios abiertos"],
+        "Vivienda": ["Población con acceso al alquiler", "Población con acceso a compra", "Parque de vivienda disponible"],
+        "Movilidad sostenible": ["Viario por el que pueden circular peatones", "Viario para la circulación de bicicletas",
+                                 "Infraestructuras de transporte público colectivo", "Aparcamiento",
+                                 "Separación de las IF para el tráfico motorizado de otros modos de transporte",
+                                 "Caminabilidad", "Accesibilidad física a carriles bici",
+                                 "Desplazamientos en otros modos de micromovilidad",
+                                 "Accesibilidad física a transporte público", "Interconexión entre zonas",
+                                 "Facilidad de desplazamiento en transporte público", "Limitación del tráfico en núcleos urbanos",
+                                 "Seguridad vial", "Nodos multimodales", "Parque de vivienda disponible para alquiler"],
+        "Biodiversidad": ["Gestión adecuada y protección de las zonas naturales"],
+        "Desigualdades": ["Desigualdades educativas", "Desigualdades espaciales", "Desigualdades en cuidados",
+                          "Desigualdades culturales", "Población en situación económica vulnerable", "Carga del cuidado"],
+        "Digitalización": ["Brecha digital", "Barreras a la accesibilidad universal"]
+    }
+
+    # Construir lista de tags según áreas seleccionadas
     tags = []
-    if areas:
-        # Mockup de tags
-        for a in areas:
-            tags.extend([f"{a}_tag1", f"{a}_tag2"])
+    for area in areas:
+        tags.extend(tags_por_area.get(area, []))
+
+    # Selección de tags activados
     tags_sel = st.multiselect("Selecciona los tags activados:", tags)
 
+    # Sliders
     esfuerzo = st.slider("Esfuerzo (0=pequeño presupuesto, 100=gran presupuesto)", 0, 100, 50)
     importancia = st.slider("Importancia estratégica (0=baja, 100=alta)", 0, 100, 50)
     escala = st.slider("Escala geográfica (0=local, 100=toda la entidad)", 0, 100, 50)
 
+    # Botones
     col1, col2 = st.columns(2)
     if col1.button("Añadir actuación"):
         st.session_state.actuaciones.append({
@@ -130,9 +179,11 @@ def pantalla_actuaciones():
     if st.button("⬅️ Atrás"):
         prev_step()
 
+    # Mostrar actuaciones registradas
     if st.session_state.actuaciones:
         st.subheader("Actuaciones registradas")
         st.write(pd.DataFrame(st.session_state.actuaciones))
+
 
 # ==============================
 # Pantalla 5 - Dashboard resumen
@@ -153,7 +204,7 @@ def pantalla_dashboard():
         counterclock=False,
         wedgeprops={"width":0.3, "edgecolor":"white"}
     )
-    ax.text(0, 0, f"{progreso}%", ha="center", va="center", fontsize=24, fontweight="bold")
+    ax.text(0, 0, f"{progreso}", ha="center", va="center", fontsize=24, fontweight="bold")
     ax.set_aspect("equal")
     
     st.pyplot(fig)
