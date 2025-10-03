@@ -187,4 +187,40 @@ def pantalla_actuaciones():
 
     esfuerzo = st.slider("Esfuerzo (0=pequeño presupuesto, 100=gran presupuesto)", 0, 100, 50)
     importancia = st.slider("Importancia estratégica (0=baja, 100=alta)", 0, 100, 50)
-    escala = st.slider("Escala geo
+    escala = st.slider("Escala geográfica (0=local, 100=toda la entidad)", 0, 100, 50)
+
+    col1, col2, col3 = st.columns(3)
+    if col1.button("⬅️ Volver a plan"):
+        prev_step()
+    if col2.button("Guardar actuación"):
+        if not nombre_act:
+            st.warning("Introduce un nombre para la actuación.")
+        else:
+            st.session_state.actuaciones.append({
+                "nombre": nombre_act,
+                "areas": areas,
+                "tags": tags_sel,
+                "esfuerzo": esfuerzo,
+                "importancia": importancia,
+                "escala": escala
+            })
+            st.success(f"Actuación '{nombre_act}' guardada.")
+    if col3.button("➡️ Simular impacto"):
+        next_step()
+
+    if st.session_state.actuaciones:
+        st.subheader("Actuaciones registradas")
+        st.write(pd.DataFrame(st.session_state.actuaciones))
+
+
+# ==========================
+# Render según paso
+# ==========================
+if st.session_state.step == 1:
+    pantalla_inicio()
+elif st.session_state.step == 2:
+    pantalla_entidad()
+elif st.session_state.step == 3:
+    pantalla_crear_plan()
+elif st.session_state.step == 4:
+    pantalla_actuaciones()
