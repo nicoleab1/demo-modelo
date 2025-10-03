@@ -35,8 +35,8 @@ def pantalla_inicio():
 
     st.session_state.tipo_entidad = st.selectbox(
         "Tipo de entidad:",
-        ["", "Local", "Autonómica", "Provincial o conjunto de municipios"],
-        index=0 if not st.session_state.tipo_entidad else ["", "Local", "Autonómica", "Provincial o conjunto de municipios"].index(st.session_state.tipo_entidad)
+        ["Local", "Autonómica", "Provincial o conjunto de municipios"],
+        index=0 if not st.session_state.tipo_entidad else ["Local", "Autonómica", "Provincial o conjunto de municipios"].index(st.session_state.tipo_entidad)
     )
 
     prioridades = st.multiselect(
