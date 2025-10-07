@@ -3,12 +3,20 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 
+
+if "todas_areas" not in st.session_state:
+    st.session_state.todas_areas = [
+        "Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular",
+        "Economía", "Gobernanza", "Datos", "Modelo de ciudad", "Vivienda",
+        "Movilidad sostenible", "Biodiversidad", "Desigualdades", "Digitalización"
+    ]
+
 # ======================
 # PANTALLA 1: INICIO
 # ======================
 def pantalla_inicio():
     """Pantalla de inicio: nombre de la organización y tipo de entidad"""
-    st.title("Bienvenido a la herramienta de planificación municipal 1")
+    st.title("Bienvenido a la herramienta de planificación municipal 3")
 
     # Nombre de la organización
     st.session_state.org_name = st.text_input("Nombre de la organización/entidad:")
@@ -30,7 +38,7 @@ def pantalla_inicio():
         "Biodiversidad", "Desigualdades", "Digitalización", "Datos"
     ]
 
-    # Usamos checkboxes para selección de un clic
+    # Usamos checkboxes para selección de un clic    
     seleccionadas = []
     st.write("Selecciona las prioridades de la entidad:")
     cols = st.columns(4)
@@ -48,8 +56,12 @@ def pantalla_inicio():
 # PANTALLA 2: SITUACIÓN ACTUAL
 # ======================
 def pantalla_prioridades_actuales():
-    """Pantalla 2: visualización de la situación actual de las prioridades"""
+    """Pantalla 2: visualización de la situación actual de todas las areas"""
     st.title(f"{st.session_state.org_name} - Situación actual")
+    st.write("📍 Ubicación: Comunidad de Madrid")
+    st.write("👥 Población: 118,000 habitantes")
+    st.write("🌍 Región: Zona Norte de Madrid")
+
 
     st.subheader("Tipo de entidad: " + st.session_state.tipo_entidad)
 
@@ -61,27 +73,44 @@ def pantalla_prioridades_actuales():
     descripciones = {"verde": "Sobresaliente", "amarillo": "Satisfactorio", "rojo": "Necesita mejorar"}
     colores = {"verde": "#4CAF50", "amarillo": "#FFC107", "rojo": "#F44336"}
 
+    todas_prioridades = [
+        "Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular",
+        "Gobernanza", "Modelo de ciudad", "Vivienda", "Movilidad sostenible",
+        "Biodiversidad", "Desigualdades", "Digitalización", "Datos"
+    ]
+    
     # Guardamos los estados aleatorios una sola vez
     if "estados_prioridades" not in st.session_state:
         st.session_state.estados_prioridades = {
-            prioridad: np.random.choice(estados_posibles) for prioridad in st.session_state.prioridades
+            prioridad: np.random.choice(estados_posibles) for prioridad in todas_prioridades
         }
 
     # Mostrar prioridades en cuadrícula
     n_cols = 4
-    prioridades = st.session_state.prioridades
-    n_prioridades = len(prioridades)
+    n_prioridades = len(todas_prioridades)
     
     for i in range(0, n_prioridades, n_cols):
         cols = st.columns(n_cols)
-        for j, prioridad in enumerate(prioridades[i:i+n_cols]):
-            estado = st.session_state.estados_prioridades.get(prioridad, "verde")
+        for j, prioridad in enumerate(todas_prioridades[i:i+n_cols]):
+            estado = st.session_state.estados_prioridades.get(prioridad, np.random.choice(estados_posibles))
+            seleccionada = prioridad in st.session_state.prioridades  # Si fue elegida antes
+
+            # Si fue seleccionada, le añadimos un borde o estrella
+            borde = "5px solid #800080" if seleccionada else "none"
+
             with cols[j]:
                 st.markdown(
                     f"""
-                    <div style="text-align:center; margin-bottom:10px;">
-                        <div style="width:70px; height:70px; border-radius:50%; background-color:{colores[estado]}; margin:auto;"></div>
-                        <p style="margin:5px 0 0 0; font-weight:bold;">{prioridad}</p>
+                    <div style="text-align:center; margin-bottom:15px;">
+                        <div style="
+                            width:80px; height:80px;
+                            border-radius:50%;
+                            background-color:{colores[estado]};
+                            margin:auto;
+                            border:{borde};
+                            box-shadow: 0px 0px 10px rgba(0,0,0,0.15);
+                        "></div>
+                        <p style="margin:8px 0 0 0; font-weight:bold;">{prioridad}</p>
                         <p style="margin:0; font-size:0.9em;">{descripciones[estado]}</p>
                     </div>
                     """,
@@ -114,7 +143,7 @@ def pantalla_crear_plan():
 
     # Botones
     col1, col2 = st.columns(2)
-    if col1.button("⬅️ Volver a prioridades"):
+    if col1.button("⬅️ Volver a situación actual"):
         st.session_state.step = 2
 
     if col2.button("Guardar y continuar ➡️"):
@@ -146,12 +175,21 @@ def pantalla_actuaciones():
     nombre_act = st.text_input("Nombre de la actuación:")
 
     # Selección de áreas
+    # Lista completa de áreas posibles
+
+    todas_las_areas = [
+        "Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular",
+        "Economía", "Gobernanza", "Datos", "Modelo de ciudad", "Vivienda",
+        "Movilidad sostenible", "Biodiversidad", "Desigualdades", "Digitalización"
+    ]
+
+    # Selección de áreas (todas disponibles)
     areas = st.multiselect(
         "Áreas relacionadas:",
-        st.session_state.prioridades,
+        todas_las_areas,
         default=st.session_state.areas_sel
     )
-
+    
     # Guardar la selección actual en session_state
     st.session_state.areas_sel = areas
 
@@ -210,9 +248,9 @@ def pantalla_actuaciones():
     st.session_state.tags_sel = tags_sel
 
     # Sliders
-    esfuerzo = st.slider("Esfuerzo (0=pequeño presupuesto, 100=gran presupuesto)", 0, 100, 50)
-    importancia = st.slider("Importancia estratégica (0=baja, 100=alta)", 0, 100, 50)
-    escala = st.slider("Escala geográfica (0=local, 100=toda la entidad)", 0, 100, 50)
+    esfuerzo = st.slider("Esfuerzo: asigna un valor alto cuando el proyecto requiere una proporción significativa de tus recursos o presenta una elevada dificultad de implementación)", 0, 100, 50)
+    importancia = st.slider("Importancia del proyecto: asigna un valor alto si se trata de una iniciativa particularmente estratégica o prioritaria para la entidad.", 0, 100, 50)
+    escala = st.slider("Escala geográfica: asigna un valor grande si afecta a toda la superficie o poblacion", 0, 100, 50)
 
     # Botones
     col1, col2 = st.columns(2)
@@ -242,6 +280,11 @@ def pantalla_actuaciones():
         st.subheader("Actuaciones registradas")
         st.write(pd.DataFrame(st.session_state.actuaciones))
 
+
+# ======================
+# PANTALLA 5: DASHBOARD
+# ======================
+
 def pantalla_dashboard():
     st.title(f"{st.session_state.org_name} - Resultados del plan")
     
@@ -265,15 +308,24 @@ def pantalla_dashboard():
     st.subheader("📊 Situación actual por prioridades")
     colores_estado = {"verde": "#4CAF50", "amarillo": "#FFC107", "rojo": "#F44336"}
     descripciones = {"verde": "Sobresaliente", "amarillo": "Satisfactorio", "rojo": "Necesita mejorar"}
-    
-    prioridades = st.session_state.prioridades
+    estados_posibles = ["verde", "amarillo", "rojo"]
+
+    # Inicializamos el estado de todas las áreas solo una vez
+    if "estados_prioridades" not in st.session_state:
+        st.session_state.estados_prioridades = {}
+        # Aseguramos al menos un color de cada tipo
+        colores_asignados = np.random.choice(estados_posibles, size=len(st.session_state.todas_areas), replace=True)
+        for i, area in enumerate(st.session_state.todas_areas):
+            st.session_state.estados_prioridades[area] = colores_asignados[i]
+
+    prioridades = st.session_state.todas_areas
     n_cols = 4
     n_prioridades = len(prioridades)
     
     for i in range(0, n_prioridades, n_cols):
         cols = st.columns(n_cols)
         for j, prioridad in enumerate(prioridades[i:i+n_cols]):
-            estado = st.session_state.estados_prioridades.get(prioridad, "verde")
+            estado = st.session_state.estados_prioridades.get(prioridad, np.random.choice(estados_posibles))
             with cols[j]:
                 st.markdown(f"""
                 <div style="text-align:center; margin-bottom:10px;">
