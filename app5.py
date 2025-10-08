@@ -6,7 +6,7 @@ import pandas as pd
 
 if "todas_areas" not in st.session_state:
     st.session_state.todas_areas = [
-        "Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular",
+        "Agua", "Energía", "Cambio climático", "Economía circular",
         "Economía", "Gobernanza", "Datos", "Modelo de ciudad", "Vivienda",
         "Movilidad sostenible", "Biodiversidad", "Desigualdades", "Digitalización"
     ]
@@ -16,7 +16,7 @@ if "todas_areas" not in st.session_state:
 # ======================
 def pantalla_inicio():
     """Pantalla de inicio: nombre de la organización y tipo de entidad"""
-    st.title("Bienvenido a la herramienta de planificación municipal 3")
+    st.title("Bienvenido a la herramienta de planificación municipal")
 
     # Nombre de la organización
     st.session_state.org_name = st.text_input("Nombre de la organización/entidad:")
@@ -32,11 +32,7 @@ def pantalla_inicio():
     )
 
     # Prioridades (selección con un solo clic)
-    prioridades_posibles = [
-        "Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular",
-        "Gobernanza", "Modelo de ciudad", "Vivienda", "Movilidad sostenible",
-        "Biodiversidad", "Desigualdades", "Digitalización", "Datos"
-    ]
+    prioridades_posibles = st.session_state.todas_areas
 
     # Usamos checkboxes para selección de un clic    
     seleccionadas = []
@@ -64,7 +60,6 @@ def pantalla_prioridades_actuales():
 
 
     st.subheader("Tipo de entidad: " + st.session_state.tipo_entidad)
-
     st.markdown("---")
     st.subheader("📊 Situación actual de las prioridades seleccionadas")
 
@@ -73,12 +68,9 @@ def pantalla_prioridades_actuales():
     descripciones = {"verde": "Sobresaliente", "amarillo": "Satisfactorio", "rojo": "Necesita mejorar"}
     colores = {"verde": "#4CAF50", "amarillo": "#FFC107", "rojo": "#F44336"}
 
-    todas_prioridades = [
-        "Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular",
-        "Gobernanza", "Modelo de ciudad", "Vivienda", "Movilidad sostenible",
-        "Biodiversidad", "Desigualdades", "Digitalización", "Datos"
-    ]
-    
+    # Usamos la lista global de áreas (definida al inicio)
+    todas_prioridades = st.session_state.todas_areas
+
     # Guardamos los estados aleatorios una sola vez
     if "estados_prioridades" not in st.session_state:
         st.session_state.estados_prioridades = {
@@ -88,7 +80,7 @@ def pantalla_prioridades_actuales():
     # Mostrar prioridades en cuadrícula
     n_cols = 4
     n_prioridades = len(todas_prioridades)
-    
+
     for i in range(0, n_prioridades, n_cols):
         cols = st.columns(n_cols)
         for j, prioridad in enumerate(todas_prioridades[i:i+n_cols]):
@@ -177,11 +169,7 @@ def pantalla_actuaciones():
     # Selección de áreas
     # Lista completa de áreas posibles
 
-    todas_las_areas = [
-        "Agua", "Energía", "Cambio climático", "Emisiones", "Economía circular",
-        "Economía", "Gobernanza", "Datos", "Modelo de ciudad", "Vivienda",
-        "Movilidad sostenible", "Biodiversidad", "Desigualdades", "Digitalización"
-    ]
+    todas_las_areas = st.session_state.todas_areas
 
     # Selección de áreas (todas disponibles)
     areas = st.multiselect(
@@ -193,7 +181,7 @@ def pantalla_actuaciones():
     # Guardar la selección actual en session_state
     st.session_state.areas_sel = areas
 
-    # Diccionario que mapea prioridades a tags
+    # Diccionario que mapea prioridades/áreas a tags
     tags_por_area = {
         "Agua": ["Riego de zonas verdes", "Agua recuperada y regenerada", "Cantidad total de agua"],
         "Energía": ["Consumo final de combustibles", "Producción local EE.RR", "Consumo final de energía eléctrica", 
@@ -248,8 +236,8 @@ def pantalla_actuaciones():
     st.session_state.tags_sel = tags_sel
 
     # Sliders
-    esfuerzo = st.slider("Esfuerzo: asigna un valor alto cuando el proyecto requiere una proporción significativa de tus recursos o presenta una elevada dificultad de implementación)", 0, 100, 50)
-    importancia = st.slider("Importancia del proyecto: asigna un valor alto si se trata de una iniciativa particularmente estratégica o prioritaria para la entidad.", 0, 100, 50)
+    esfuerzo = st.slider("Esfuerzo: asigna un valor alto cuando el proyecto requiere una proporción significativa de tus recursos o presenta una elevada dificultad de implementación", 0, 100, 50)
+    importancia = st.slider("Importancia del proyecto: asigna un valor alto si se trata de una iniciativa particularmente estratégica o prioritaria para la entidad", 0, 100, 50)
     escala = st.slider("Escala geográfica: asigna un valor grande si afecta a toda la superficie o poblacion", 0, 100, 50)
 
     # Botones
